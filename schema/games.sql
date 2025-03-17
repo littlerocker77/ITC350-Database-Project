@@ -5,7 +5,7 @@ CREATE TABLE VideoGame (
   Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
   Genre VARCHAR(255) NOT NULL,
   Quantity INT NOT NULL CHECK (Quantity >= 0),
-  Company VARCHAR(255) NOT NULL,
+  Platform VARCHAR(255) NOT NULL,
   PRIMARY KEY (GameID)
 );
 

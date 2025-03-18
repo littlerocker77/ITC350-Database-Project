@@ -8,7 +8,7 @@ CREATE TABLE VideoGame (
   PRIMARY KEY (GameID)
 );
 
-CREATE TABLE User (  -- Renamed to User instead of Retailer
+CREATE TABLE UserTable (  -- Renamed from User to UserTable
   UserID INT NOT NULL AUTO_INCREMENT,
   Password VARCHAR(255) NOT NULL,
   UserName VARCHAR(255) NOT NULL UNIQUE,
@@ -22,7 +22,7 @@ CREATE TABLE Updates (
   StaffID INT NOT NULL,  -- Fixed column name for clarity
   PRIMARY KEY (GameID, StaffID),
   FOREIGN KEY (GameID) REFERENCES VideoGame(GameID),
-  FOREIGN KEY (StaffID) REFERENCES User(UserID)
+  FOREIGN KEY (StaffID) REFERENCES UserTable(UserID)  -- Updated reference to UserTable
 );
 
 CREATE TABLE Views (
@@ -30,7 +30,7 @@ CREATE TABLE Views (
   UserID INT NOT NULL,
   PRIMARY KEY (GameID, UserID),
   FOREIGN KEY (GameID) REFERENCES VideoGame(GameID),
-  FOREIGN KEY (UserID) REFERENCES User(UserID)
+  FOREIGN KEY (UserID) REFERENCES UserTable(UserID)  -- Updated reference to UserTable
 );
 
 CREATE TABLE VideoGame_Platform (

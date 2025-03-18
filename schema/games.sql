@@ -1,44 +1,36 @@
 CREATE TABLE VideoGame (
   GameID INT NOT NULL AUTO_INCREMENT,
-  Price DECIMAL(10, 2) NOT NULL CHECK (Price >= 0),
+  Price DECIMAL(10,2) NOT NULL CHECK (Price >= 0),
   GameName VARCHAR(255) NOT NULL,
   Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
   Genre VARCHAR(255) NOT NULL,
   Quantity INT NOT NULL CHECK (Quantity >= 0),
-  Platform VARCHAR(255) NOT NULL,
   PRIMARY KEY (GameID)
 );
 
-CREATE TABLE Retailor (
-  RetailID INT NOT NULL AUTO_INCREMENT,
-  RPassword VARCHAR(255) NOT NULL,
-  RUserName VARCHAR(255) NOT NULL UNIQUE,
-  PRIMARY KEY (RetailID)
-);
-
-CREATE TABLE WarehouseStaff (
-  StaffID INT NOT NULL AUTO_INCREMENT,
-  SPassword VARCHAR(255) NOT NULL,
-  SUserName VARCHAR(255) NOT NULL UNIQUE,
-  IsAdmin BOOLEAN NOT NULL,
-  PRIMARY KEY (StaffID)
+CREATE TABLE User (  -- Renamed to User instead of Retailer
+  UserID INT NOT NULL AUTO_INCREMENT,
+  Password VARCHAR(255) NOT NULL,
+  UserName VARCHAR(255) NOT NULL UNIQUE,
+  UserType INT NOT NULL CHECK (UserType IN (0, 1)),  -- 0 for Warehouse Staff, 1 for Retailers
+  PRIMARY KEY (UserID)
 );
 
 -- Many-to-Many Tables
 CREATE TABLE Updates (
   GameID INT NOT NULL,
-  StaffID INT NOT NULL,
+  StaffID INT NOT NULL,  -- Fixed column name for clarity
   PRIMARY KEY (GameID, StaffID),
   FOREIGN KEY (GameID) REFERENCES VideoGame(GameID),
-  FOREIGN KEY (StaffID) REFERENCES WarehouseStaff(StaffID)
+  FOREIGN KEY (StaffID) REFERENCES User(UserID)
 );
 
 CREATE TABLE Views (
   GameID INT NOT NULL,
-  RetailID INT NOT NULL,
-  PRIMARY KEY (GameID, RetailID),
+  UserID INT NOT NULL,
+  PRIMARY KEY (GameID, UserID),
   FOREIGN KEY (GameID) REFERENCES VideoGame(GameID),
-  FOREIGN KEY (RetailID) REFERENCES Retailor(RetailID)
+  FOREIGN KEY (UserID) REFERENCES User(UserID)
 );
 
 CREATE TABLE VideoGame_Platform (

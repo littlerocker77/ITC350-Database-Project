@@ -1,36 +1,37 @@
 -- Insert into VideoGame
-INSERT INTO VideoGame (Price, GameName, Rating, Genre, Quantity, Company)
+INSERT INTO VideoGame (Price, GameName, Rating, Genre, Quantity)
 VALUES 
-  (59.99, 'The Legend of Zelda: Breath of the Wild', 5, 'Adventure', 100, 'Nintendo'),
-  (49.99, 'Halo Infinite', 4, 'FPS', 75, 'Xbox Game Studios'),
-  (59.99, 'Super Smash Bros. Ultimate', 5, 'Fighting', 50, 'Nintendo');  -- Fixed typo and misplaced period
+  (59.99, 'The Legend of Zelda: Breath of the Wild', 5, 'Adventure', 100),
+  (49.99, 'Halo Infinite', 4, 'FPS', 75),
+  (59.99, 'Super Smash Bros. Ultimate', 5, 'Fighting', 50);
 
--- Insert into Retailor
-INSERT INTO Retailor (RPassword, RUserName)
+-- Insert into UserTable (Retailers and Warehouse Staff)
+-- Retailers (UserType = 1)
+INSERT INTO UserTable (Password, UserName, UserType)
 VALUES 
-  ('retail123', 'retail_user1'),
-  ('retail456', 'retail_user2');
+  ('retail123', 'retail_user1', 1),
+  ('retail456', 'retail_user2', 1);
 
--- Insert into WarehouseStaff (Fixed Typo)
-INSERT INTO WarehouseStaff (SPassword, SUserName, IsAdmin)
+-- Warehouse Staff (UserType = 0)
+INSERT INTO UserTable (Password, UserName, UserType)
 VALUES 
-  ('staff123', 'admin_john', TRUE),
-  ('staff456', 'worker_emma', FALSE);
+  ('staff123', 'admin_john', 0),
+  ('staff456', 'worker_emma', 0);
 
--- Insert into Updates
+-- Insert into Updates (Tracks which staff updated which game)
 INSERT INTO Updates (GameID, StaffID)
 VALUES 
-  (1, 1),
-  (2, 1),
-  (3, 1);
+  (1, 3),  -- Assuming 'admin_john' has UserID 3
+  (2, 3),
+  (3, 3);
 
--- Insert into Views (Fixed RetailID 3 issue)
-INSERT INTO Views (GameID, RetailID)
+-- Insert into Views (Tracks which retailers viewed which games)
+INSERT INTO Views (GameID, UserID)
 VALUES 
-  (1, 1),
-  (2, 2);
+  (1, 1),  -- retail_user1 viewed The Legend of Zelda
+  (2, 2);  -- retail_user2 viewed Halo Infinite
 
--- Insert into VideoGame_Platform (Fixed missing comma)
+-- Insert into VideoGame_Platform (Associates games with platforms)
 INSERT INTO VideoGame_Platform (Platform, GameID)
 VALUES 
   ('Nintendo Switch', 1),

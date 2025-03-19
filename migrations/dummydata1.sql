@@ -1,3 +1,4 @@
+-- Dummy data of various video game attributes that will be used in the application
 -- Insert into VideoGame
 INSERT INTO VideoGame (Price, GameName, Rating, Genre, Quantity)
 VALUES 

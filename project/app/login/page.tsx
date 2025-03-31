@@ -12,9 +12,10 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+
     try {
-      const res = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -22,51 +23,48 @@ export default function Login() {
         body: JSON.stringify({ username, password }),
       });
 
-      if (res.ok) {
-        router.push('/inventory');
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Login failed');
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
       }
+
+      router.push('/inventory');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(err instanceof Error ? err.message : 'Login failed');
     }
   };
 
   return (
-    <div className={styles.loginContainer}>
-      <form onSubmit={handleSubmit} className={styles.loginForm}>
-        <h1>P Triple E Games</h1>
-        <h2>Login</h2>
-        
+    <div className={styles.container}>
+      <div className={styles.loginBox}>
+        <h1>Login</h1>
         {error && <div className={styles.error}>{error}</div>}
-        
-        <div className={styles.inputGroup}>
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className={styles.inputGroup}>
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <button type="submit" className={styles.loginButton}>
-          Login
-        </button>
-      </form>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label htmlFor="username">Username:</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="password">Password:</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className={styles.submitButton}>
+            Login
+          </button>
+        </form>
+      </div>
     </div>
   );
 } 

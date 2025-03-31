@@ -14,10 +14,17 @@ interface VideoGame {
   Price: number;
 }
 
+interface User {
+  id: number;
+  username: string;
+  userType: number;
+}
+
 export default function Inventory() {
   const [games, setGames] = useState<VideoGame[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [user, setUser] = useState<User | null>(null);
   const [filter, setFilter] = useState({
     platform: '',
     genre: '',
@@ -36,8 +43,23 @@ export default function Inventory() {
   const router = useRouter();
 
   useEffect(() => {
+    checkAuth();
     fetchInventory();
   }, []);
+
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth/user');
+      if (!res.ok) {
+        router.push('/login');
+        return;
+      }
+      const userData = await res.json();
+      setUser(userData);
+    } catch (err) {
+      router.push('/login');
+    }
+  };
 
   const fetchInventory = async () => {
     try {
@@ -56,6 +78,11 @@ export default function Inventory() {
 
   const handleAddGame = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user || user.userType !== 1) {
+      setError('Unauthorized: Only administrators can add games');
+      return;
+    }
+
     try {
       const response = await fetch('/api/inventory', {
         method: 'POST',
@@ -75,8 +102,8 @@ export default function Inventory() {
       }
 
       setShowAddForm(false);
-      fetchInventory(); // Refresh the list
-      setNewGame({ // Reset form
+      fetchInventory();
+      setNewGame({
         GameName: '',
         Price: '',
         Rating: '1',
@@ -96,12 +123,14 @@ export default function Inventory() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Inventory Management</h1>
-        <button 
-          className={styles.addButton}
-          onClick={() => setShowAddForm(true)}
-        >
-          Add New Game
-        </button>
+        {user && user.userType === 1 && (
+          <button 
+            className={styles.addButton}
+            onClick={() => setShowAddForm(true)}
+          >
+            Add New Game
+          </button>
+        )}
       </div>
       
       <div className={styles.filters}>
@@ -135,7 +164,7 @@ export default function Inventory() {
             <th>Rating</th>
             <th>Quantity</th>
             <th>Price</th>
-            <th>Actions</th>
+            {user && user.userType === 1 && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -147,16 +176,18 @@ export default function Inventory() {
               <td>{game.Rating}</td>
               <td>{game.Quantity}</td>
               <td>${typeof game.Price === 'number' ? game.Price.toFixed(2) : Number(game.Price).toFixed(2)}</td>
-              <td>
-                <button onClick={() => {}}>Edit</button>
-                <button onClick={() => {}}>Delete</button>
-              </td>
+              {user && user.userType === 1 && (
+                <td>
+                  <button onClick={() => {}}>Edit</button>
+                  <button onClick={() => {}}>Delete</button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
 
-      {showAddForm && (
+      {showAddForm && user && user.userType === 1 && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Add New Game</h2>

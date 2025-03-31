@@ -1,49 +1,51 @@
 import { NextResponse } from 'next/server';
-import { authenticateUser } from '../../../lib/auth';
 import { cookies } from 'next/headers';
-import { sign } from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { authenticate } from '../../../lib/auth';
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { username, password } = body;
 
-    const user = await authenticateUser(username, password);
-
-    if (!user) {
+    if (!username || !password) {
       return NextResponse.json(
-        { error: 'Invalid credentials' },
+        { error: 'Username and password are required' },
+        { status: 400 }
+      );
+    }
+
+    const result = await authenticate(username, password);
+    if (!result) {
+      return NextResponse.json(
+        { error: 'Invalid username or password' },
         { status: 401 }
       );
     }
 
-    // Create JWT token
-    const token = sign(
-      { 
+    const { token, user } = result;
+    
+    // Set the token in an HTTP-only cookie
+    const response = NextResponse.json({
+      message: 'Login successful',
+      user: {
         id: user.id,
         username: user.username,
         userType: user.userType
-      },
-      JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+      }
+    });
 
-    // Set cookie
-    const cookieStore = await cookies();
-    cookieStore.set('auth-token', token, {
+    response.cookies.set('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 86400 // 1 day
+      maxAge: 60 * 60 * 24 // 24 hours
     });
 
-    return NextResponse.json({ success: true });
+    return response;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'An error occurred during login' },
       { status: 500 }
     );
   }

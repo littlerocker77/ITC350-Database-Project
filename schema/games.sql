@@ -5,7 +5,9 @@ CREATE TABLE VideoGame (
   Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
   Genre VARCHAR(255) NOT NULL,
   Quantity INT NOT NULL CHECK (Quantity >= 0),
+  PlatformID INT NOT NULL CHECK (Rating BETWEEN 1 AND 3), -- Switch=1, Xbox=2, PS5=3
   PRIMARY KEY (GameID)
+  FOREIGN KEY (PlatformID) REFERENCES VideoGame_Platform(PlatformID),
 );
 
 CREATE TABLE UserTable (  -- Renamed from User to UserTable
@@ -34,8 +36,7 @@ CREATE TABLE Views (
 );
 
 CREATE TABLE VideoGame_Platform (
+  PlatformID INT NOT NULL CHECK (Rating BETWEEN 1 AND 3), -- Switch=1, Xbox=2, PS5=3
   Platform VARCHAR(255) NOT NULL,
-  GameID INT NOT NULL,
-  PRIMARY KEY (Platform, GameID),
-  FOREIGN KEY (GameID) REFERENCES VideoGame(GameID)
+  PRIMARY KEY (PlatformID),
 );

@@ -37,4 +37,4 @@ INSERT INTO VideoGame_Platform (Platform, PlatformID)
 VALUES 
   ('Nintendo Switch', 1),
   ('Xbox Series X', 2),
-  ('Nintendo Switch', 3);
+  ('PlayStation 5', 3);

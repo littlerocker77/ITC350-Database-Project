@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { db } from './db';
+import { compare } from 'bcryptjs';
 import { RowDataPacket } from 'mysql2';
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'your-secret-key');
@@ -14,23 +15,31 @@ interface UserRow extends RowDataPacket {
   UserID: number;
   UserName: string;
   UserType: number;
+  Password: string;
 }
 
 export async function authenticate(username: string, password: string): Promise<{ token: string; user: User } | null> {
   try {
     const [rows] = await db.execute<UserRow[]>(
-      'SELECT UserID, UserName, UserType FROM UserTable WHERE UserName = ? AND Password = ?',
-      [username, password]
+      'SELECT UserID, UserName, UserType, Password FROM UserTable WHERE UserName = ?',
+      [username]
     );
 
     if (!rows.length) {
       return null;
     }
 
+    const user = rows[0];
+    const isValidPassword = await compare(password, user.Password);
+
+    if (!isValidPassword) {
+      return null;
+    }
+
     const userData: User = {
-      id: rows[0].UserID,
-      username: rows[0].UserName,
-      userType: rows[0].UserType
+      id: user.UserID,
+      username: user.UserName,
+      userType: user.UserType
     };
 
     const token = await new SignJWT({ ...userData })

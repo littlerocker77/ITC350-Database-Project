@@ -1,60 +1,212 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './about.module.css';
 
-interface UserInfo {
-  UserID: number;
-  UserName: string;
-  UserType: number;
+interface User {
+  id: number;
+  username: string;
+  userType: number;
 }
 
 export default function About() {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
-    fetchUserInfo();
+    checkAuth();
   }, []);
 
-  const fetchUserInfo = async () => {
+  const checkAuth = async () => {
     try {
-      const res = await fetch('/api/user/info');
+      const res = await fetch('/api/auth/user');
       if (!res.ok) {
-        throw new Error('Failed to fetch user info');
+        router.push('/login');
+        return;
       }
-      const data = await res.json();
-      setUserInfo(data);
-      setLoading(false);
+      const userData = await res.json();
+      setUser(userData);
+      setNewUsername(userData.username);
     } catch (err) {
-      setError('Failed to load user information');
-      setLoading(false);
+      router.push('/login');
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div className={styles.error}>{error}</div>;
-  if (!userInfo) return <div>No user information available</div>;
+  const handleUpdateUsername = async () => {
+    if (!user || !newUsername.trim()) return;
+
+    try {
+      const res = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user.id,
+          username: newUsername.trim()
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update username');
+      }
+
+      setSuccess('Username updated successfully');
+      setIsEditingUsername(false);
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update username');
+      setSuccess('');
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!user || !newPassword || !confirmPassword) return;
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/user/update', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          userId: user.id,
+          password: newPassword
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update password');
+      }
+
+      setSuccess('Password updated successfully');
+      setIsEditingPassword(false);
+      setNewPassword('');
+      setConfirmPassword('');
+      setError('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update password');
+      setSuccess('');
+    }
+  };
+
+  if (!user) return <div>Loading...</div>;
 
   return (
     <div className={styles.container}>
-      <h1>About</h1>
-      <div className={styles.userInfo}>
-        <h2>User Information</h2>
-        <div className={styles.infoGrid}>
-          <div className={styles.infoItem}>
-            <label>Username:</label>
-            <span>{userInfo.UserName}</span>
+      <h1>User Profile</h1>
+      
+      {error && <div className={styles.error}>{error}</div>}
+      {success && <div className={styles.success}>{success}</div>}
+
+      <div className={styles.profileSection}>
+        <div className={styles.field}>
+          <label>Username:</label>
+          <div className={styles.fieldContent}>
+            {isEditingUsername ? (
+              <>
+                <input
+                  type="text"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  className={styles.input}
+                />
+                <button 
+                  onClick={handleUpdateUsername}
+                  className={styles.saveButton}
+                >
+                  Save
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsEditingUsername(false);
+                    setNewUsername(user.username);
+                    setError('');
+                  }}
+                  className={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <span>{user.username}</span>
+                <button 
+                  onClick={() => setIsEditingUsername(true)}
+                  className={styles.editButton}
+                >
+                  Edit
+                </button>
+              </>
+            )}
           </div>
-          <div className={styles.infoItem}>
-            <label>Role:</label>
-            <span>{userInfo.UserType === 0 ? 'Warehouse Staff' : 'Retailer'}</span>
+        </div>
+
+        <div className={styles.field}>
+          <label>Password:</label>
+          <div className={styles.fieldContent}>
+            {isEditingPassword ? (
+              <>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="New password"
+                  className={styles.input}
+                />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  className={styles.input}
+                />
+                <button 
+                  onClick={handleUpdatePassword}
+                  className={styles.saveButton}
+                >
+                  Save
+                </button>
+                <button 
+                  onClick={() => {
+                    setIsEditingPassword(false);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setError('');
+                  }}
+                  className={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <span>••••••••</span>
+                <button 
+                  onClick={() => setIsEditingPassword(true)}
+                  className={styles.editButton}
+                >
+                  Edit
+                </button>
+              </>
+            )}
           </div>
-          <div className={styles.infoItem}>
-            <label>User ID:</label>
-            <span>{userInfo.UserID}</span>
-          </div>
+        </div>
+
+        <div className={styles.field}>
+          <label>User Type:</label>
+          <span>{user.userType === 1 ? 'Administrator' : 'Regular User'}</span>
         </div>
       </div>
     </div>

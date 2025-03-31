@@ -8,6 +8,7 @@ export default function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -15,7 +16,8 @@ export default function Login() {
     setError('');
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,19 +27,19 @@ export default function Login() {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Login failed');
+        throw new Error(data.error || 'Authentication failed');
       }
 
       router.push('/inventory');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Authentication failed');
     }
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.loginBox}>
-        <h1>Login</h1>
+        <h1>{isRegistering ? 'Register' : 'Login'}</h1>
         {error && <div className={styles.error}>{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
@@ -61,9 +63,20 @@ export default function Login() {
             />
           </div>
           <button type="submit" className={styles.submitButton}>
-            Login
+            {isRegistering ? 'Register' : 'Login'}
           </button>
         </form>
+        <div className={styles.switchMode}>
+          <button
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError('');
+            }}
+            className={styles.switchButton}
+          >
+            {isRegistering ? 'Already have an account? Login' : 'Need an account? Register'}
+          </button>
+        </div>
       </div>
     </div>
   );

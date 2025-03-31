@@ -68,6 +68,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
+  margin-bottom: 1rem;
 }
 
 .submitButton:hover {
@@ -77,4 +78,23 @@
 .submitButton:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.switchMode {
+  text-align: center;
+}
+
+.switchButton {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.15s ease-in-out;
+}
+
+.switchButton:hover {
+  color: #2563eb;
+  text-decoration: underline;
 } 

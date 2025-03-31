@@ -1,0 +1,64 @@
+# dependencies
+project/node_modules
+project/.pnp
+project/.pnp.js
+
+# testing
+project/coverage
+
+# next.js
+project/.next/
+project/out/
+project/build
+.next/
+
+# misc
+.DS_Store
+**/.DS_Store
+*.pem
+project/.env
+project/.env.local
+project/.env.development.local
+project/.env.test.local
+project/.env.production.local
+project/.env*.local
+
+# debug
+project/npm-debug.log*
+project/yarn-debug.log*
+project/yarn-error.log*
+
+# typescript
+project/*.tsbuildinfo
+project/next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+**/*.swp
+**/*.swo
+
+# Logs
+project/logs
+**/*.log
+
+# Runtime data
+project/pids
+project/*.pid
+project/*.seed
+project/*.pid.lock
+
+# Security / Secrets
+project/.env
+project/.env.*
+!project/.env.example
+**/*.key
+**/*.pem
+**/config/secrets.json
+**/credentials.json
+**/private.key
+**/public.key
+**/secrets.yaml
+**/secrets.yml
+**/secrets.json
+

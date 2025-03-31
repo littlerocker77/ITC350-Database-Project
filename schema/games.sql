@@ -1,11 +1,17 @@
+CREATE TABLE VideoGame_Platform (
+  PlatformID INT NOT NULL, -- Switch=1, Xbox=2, PS5=3
+  Platform VARCHAR(255) NOT NULL,
+  PRIMARY KEY (PlatformID)
+);
+
 CREATE TABLE VideoGame (
   GameID INT NOT NULL AUTO_INCREMENT,
   Price DECIMAL(10,2) NOT NULL CHECK (Price >= 0),
   GameName VARCHAR(255) NOT NULL,
-  Rating INT NOT NULL CHECK (Rating BETWEEN 1 AND 5),
+  Rating INT NOT NULL,
   Genre VARCHAR(255) NOT NULL,
   Quantity INT NOT NULL CHECK (Quantity >= 0),
-  PlatformID INT NOT NULL CHECK (Rating BETWEEN 1 AND 3), -- Switch=1, Xbox=2, PS5=3
+  PlatformID INT NOT NULL, -- Switch=1, Xbox=2, PS5=3
   PRIMARY KEY (GameID),
   FOREIGN KEY (PlatformID) REFERENCES VideoGame_Platform(PlatformID)
 );
@@ -27,16 +33,3 @@ CREATE TABLE Updates (
   FOREIGN KEY (StaffID) REFERENCES UserTable(UserID)  -- Updated reference to UserTable
 );
 
-CREATE TABLE Views (
-  GameID INT NOT NULL,
-  UserID INT NOT NULL,
-  PRIMARY KEY (GameID, UserID),
-  FOREIGN KEY (GameID) REFERENCES VideoGame(GameID),
-  FOREIGN KEY (UserID) REFERENCES UserTable(UserID)  -- Updated reference to UserTable
-);
-
-CREATE TABLE VideoGame_Platform (
-  PlatformID INT NOT NULL CHECK (Rating BETWEEN 1 AND 3), -- Switch=1, Xbox=2, PS5=3
-  Platform VARCHAR(255) NOT NULL,
-  PRIMARY KEY (PlatformID)
-);

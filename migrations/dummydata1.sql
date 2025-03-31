@@ -1,6 +1,6 @@
 -- Dummy data of various video game attributes that will be used in the application
 -- Insert into VideoGame
-INSERT INTO VideoGame (Price, GameName, Rating, Genre, Quantity)
+INSERT INTO VideoGame (Price, GameName, Rating, Genre, Quantity, Platform)
 VALUES 
   (59.99, 'The Legend of Zelda: Breath of the Wild', 5, 'Adventure', 100),
   (49.99, 'Halo Infinite', 4, 'FPS', 75),
@@ -33,7 +33,7 @@ VALUES
   (2, 2);  -- retail_user2 viewed Halo Infinite
 
 -- Insert into VideoGame_Platform (Associates games with platforms)
-INSERT INTO VideoGame_Platform (Platform, GameID)
+INSERT INTO VideoGame_Platform (Platform, PlatformID)
 VALUES 
   ('Nintendo Switch', 1),
   ('Xbox Series X', 2),

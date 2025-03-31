@@ -168,4 +168,57 @@
 
 .formActions button[type="button"]:hover {
   background: #e5e5e5;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.quantityButton {
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.quantityButton:hover {
+  background: #e0e0e0;
+}
+
+.editButton, .deleteButton {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin: 0 2px;
+  transition: all 0.2s ease;
+}
+
+.editButton {
+  background: #4CAF50;
+  color: white;
+}
+
+.editButton:hover {
+  background: #45a049;
+}
+
+.deleteButton {
+  background: #f44336;
+  color: white;
+}
+
+.deleteButton:hover {
+  background: #da190b;
 } 

@@ -14,6 +14,7 @@ export async function GET(request: Request) {
         vg.Rating,
         vg.Genre,
         vg.Quantity,
+        vg.ImageUrl,
         vgp.Platform
       FROM VideoGame vg
       JOIN VideoGame_Platform vgp ON vg.PlatformID = vgp.PlatformID
@@ -53,7 +54,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { GameName, Price, Rating, Genre, Quantity, Platform } = body;
+    const { GameName, Price, Rating, Genre, Quantity, Platform, ImageUrl } = body;
+    
+    console.log('API: Received game data:', { GameName, Price, Rating, Genre, Quantity, Platform, ImageUrl });
 
     // Start a transaction
     const connection = await db.getConnection();
@@ -71,26 +74,30 @@ export async function POST(request: Request) {
       }
 
       const platformId = platformResult[0].PlatformID;
+      console.log('API: Found platform ID:', platformId);
 
-      // Insert into VideoGame table with PlatformID
+      // Insert into VideoGame table with PlatformID and ImageUrl
       const [result]: any = await connection.query(
-        'INSERT INTO VideoGame (GameName, Price, Rating, Genre, Quantity, PlatformID) VALUES (?, ?, ?, ?, ?, ?)',
-        [GameName, Price, Rating, Genre, Quantity, platformId]
+        'INSERT INTO VideoGame (GameName, Price, Rating, Genre, Quantity, PlatformID, ImageUrl) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [GameName, Price, Rating, Genre, Quantity, platformId, ImageUrl || null]
       );
+
+      console.log('API: Game added successfully with ID:', result.insertId);
 
       await connection.commit();
       connection.release();
 
       return NextResponse.json({ success: true, gameId: result.insertId });
     } catch (error) {
+      console.error('API: Transaction error:', error);
       await connection.rollback();
       connection.release();
       throw error;
     }
   } catch (error) {
-    console.error('Failed to add game:', error);
+    console.error('API: Failed to add game:', error);
     return NextResponse.json(
-      { error: 'Failed to add game' },
+      { error: error instanceof Error ? error.message : 'Failed to add game' },
       { status: 500 }
     );
   }

@@ -10,6 +10,9 @@ interface User {
   userType: number;
 }
 
+// This page is used to view and edit the user's profile information 
+// It is protected and requires a valid token to access
+
 export default function About() {
   const [user, setUser] = useState<User | null>(null);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
@@ -25,6 +28,7 @@ export default function About() {
     checkAuth();
   }, []);
 
+  // Check if the user is authenticated
   const checkAuth = async () => {
     try {
       const res = await fetch('/api/auth/user');
@@ -39,7 +43,7 @@ export default function About() {
       router.push('/login');
     }
   };
-
+  // Update the username
   const handleUpdateUsername = async () => {
     if (!user || !newUsername.trim()) return;
 
@@ -69,7 +73,7 @@ export default function About() {
 
   const handleUpdatePassword = async () => {
     if (!user || !newPassword || !confirmPassword) return;
-
+    // Check if the passwords match
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -100,16 +104,16 @@ export default function About() {
       setSuccess('');
     }
   };
-
+  // If the user is not authenticated, return a loading message
   if (!user) return <div>Loading...</div>;
-
+  // If the user is authenticated, return the profile page
   return (
     <div className={styles.container}>
       <h1>User Profile</h1>
       
       {error && <div className={styles.error}>{error}</div>}
       {success && <div className={styles.success}>{success}</div>}
-
+      {/* Profile section */}
       <div className={styles.profileSection}>
         <div className={styles.field}>
           <label>Username:</label>

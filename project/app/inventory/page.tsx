@@ -1,40 +1,38 @@
+/**
+ * Inventory Management Page
+ * This component handles the display and management of video game inventory.
+ * It provides functionality for viewing, adding, editing, and deleting games.
+ * Admin users have additional capabilities for managing the inventory.
+ */
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './inventory.module.css';
-
-interface VideoGame {
-  GameID: number;
-  GameName: string;
-  Platform: string;
-  Rating: number;
-  Genre: string;
-  Quantity: number;
-  Price: number;
-}
-
-interface User {
-  id: number;
-  username: string;
-  userType: number;
-}
+import GameForm from '../components/GameForm';
+import { api } from '../services/api';
+import { VideoGame, User, GameFormData, FilterState } from '../types';
+import Image from 'next/image';
 
 export default function Inventory() {
-  const [games, setGames] = useState<VideoGame[]>([]);
-  const [platforms, setPlatforms] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [user, setUser] = useState<User | null>(null);
-  const [filter, setFilter] = useState({
+  // State management for the inventory system
+  const [games, setGames] = useState<VideoGame[]>([]); // Stores all games in inventory
+  const [platforms, setPlatforms] = useState<string[]>([]); // Available gaming platforms
+  const [loading, setLoading] = useState(true); // Loading state indicator
+  const [error, setError] = useState(''); // Error message storage
+  const [user, setUser] = useState<User | null>(null); // Current user information
+  const [filter, setFilter] = useState<FilterState>({ // Filter state for inventory
     platform: '',
     genre: '',
     rating: ''
   });
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
-  const [editingGame, setEditingGame] = useState<VideoGame | null>(null);
-  const [newGame, setNewGame] = useState({
+  
+  // Form state management
+  const [showAddForm, setShowAddForm] = useState(false); // Controls add game form visibility
+  const [showEditForm, setShowEditForm] = useState(false); // Controls edit game form visibility
+  const [editingGame, setEditingGame] = useState<VideoGame | null>(null); // Currently edited game
+  const [editFormData, setEditFormData] = useState<GameFormData>({ // Form data for editing
     GameName: '',
     Price: '',
     Rating: '1',
@@ -42,57 +40,62 @@ export default function Inventory() {
     Quantity: '0',
     Platform: ''
   });
+  const [newGame, setNewGame] = useState<GameFormData>({ // Form data for adding new game
+    GameName: '',
+    Price: '',
+    Rating: '1',
+    Genre: '',
+    Quantity: '0',
+    Platform: '',
+    ImageUrl: ''
+  });
 
   const router = useRouter();
 
+  // Initial setup: check authentication and fetch data
   useEffect(() => {
     checkAuth();
-    fetchInventory();
-    fetchPlatforms();
+    fetchData();
   }, []);
 
+  /**
+   * Verifies user authentication status
+   * Redirects to login if not authenticated
+   */
   const checkAuth = async () => {
     try {
-      const res = await fetch('/api/auth/user');
-      if (!res.ok) {
-        router.push('/login');
-        return;
-      }
-      const userData = await res.json();
+      const userData = await api.fetchUser();
       setUser(userData);
     } catch (err) {
       router.push('/login');
     }
   };
 
-  const fetchPlatforms = async () => {
+  /**
+   * Fetches inventory and platform data from the API
+   * Updates the state with the fetched data
+   */
+  const fetchData = async () => {
     try {
-      const res = await fetch('/api/platforms');
-      if (!res.ok) {
-        throw new Error('Failed to fetch platforms');
-      }
-      const data = await res.json();
-      setPlatforms(data);
-    } catch (err) {
-      console.error('Failed to fetch platforms:', err);
-    }
-  };
-
-  const fetchInventory = async () => {
-    try {
-      const res = await fetch('/api/inventory');
-      if (!res.ok) {
-        throw new Error('Failed to fetch inventory');
-      }
-      const data = await res.json();
-      setGames(data);
+      const [inventoryData, platformsData] = await Promise.all([
+        api.fetchInventory(),
+        api.fetchPlatforms()
+      ]);
+      console.log('Fetched inventory data:', inventoryData);
+      setGames(inventoryData);
+      setPlatforms(platformsData);
       setLoading(false);
     } catch (err) {
-      setError('Failed to load inventory');
+      console.error('Error fetching data:', err);
+      setError('Failed to load data');
       setLoading(false);
     }
   };
 
+  /**
+   * Handles the submission of a new game
+   * Validates admin privileges and processes the form data
+   */
   const handleAddGame = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || user.userType !== 1) {
@@ -101,70 +104,48 @@ export default function Inventory() {
     }
 
     try {
-      const response = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...newGame,
-          Price: parseFloat(newGame.Price),
-          Rating: parseInt(newGame.Rating),
-          Quantity: parseInt(newGame.Quantity)
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to add game');
-      }
-
+      console.log('Submitting new game data:', newGame);
+      await api.addGame(newGame);
+      console.log('Game added successfully');
       setShowAddForm(false);
-      fetchInventory();
+      fetchData();
       setNewGame({
         GameName: '',
         Price: '',
         Rating: '1',
         Genre: '',
         Quantity: '0',
-        Platform: ''
+        Platform: '',
+        ImageUrl: ''
       });
     } catch (err) {
+      console.error('Error adding game:', err);
       setError('Failed to add game');
     }
   };
 
+  /**
+   * Handles the update of an existing game
+   * Validates admin privileges and processes the form data
+   */
   const handleUpdateGame = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || user.userType !== 1 || !editingGame) return;
 
     try {
-      const response = await fetch(`/api/inventory/${editingGame.GameID}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          GameName: editingGame.GameName,
-          Price: editingGame.Price,
-          Rating: editingGame.Rating,
-          Genre: editingGame.Genre,
-          Quantity: editingGame.Quantity,
-          Platform: editingGame.Platform
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update game');
-      }
-
+      await api.updateGame(editingGame.GameID, editFormData);
       setShowEditForm(false);
       setEditingGame(null);
-      fetchInventory();
+      fetchData();
     } catch (err) {
       setError('Failed to update game');
     }
   };
 
+  /**
+   * Handles the deletion of a game
+   * Includes confirmation dialog and admin validation
+   */
   const handleDeleteGame = async (gameId: number) => {
     if (!user || user.userType !== 1) return;
 
@@ -173,32 +154,60 @@ export default function Inventory() {
     }
 
     try {
-      const response = await fetch(`/api/inventory/${gameId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete game');
-      }
-
-      fetchInventory();
+      await api.deleteGame(gameId);
+      fetchData();
     } catch (err) {
       setError('Failed to delete game');
     }
   };
 
+  /**
+   * Initializes the edit form with the selected game's data
+   * @param game The game to be edited
+   */
   const startEdit = (game: VideoGame) => {
-    setEditingGame({ ...game });
+    setEditingGame(game);
+    setEditFormData({
+      ...game,
+      Price: game.Price.toString(),
+      Rating: game.Rating.toString(),
+      Quantity: game.Quantity.toString(),
+      ImageUrl: game.ImageUrl || ''
+    });
     setShowEditForm(true);
   };
 
+  /**
+   * Handles form field changes for both add and edit forms
+   * @param field The field being changed
+   * @param value The new value
+   */
+  const handleFormChange = (field: keyof GameFormData, value: string) => {
+    if (showEditForm) {
+      setEditFormData({ ...editFormData, [field]: value });
+    } else {
+      setNewGame({ ...newGame, [field]: value });
+    }
+  };
+
+  // Loading and error states
   if (loading) return <div>Loading...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
 
+  // Filter games based on selected criteria
+  const filteredGames = games.filter(game => {
+    if (filter.platform && game.Platform !== filter.platform) return false;
+    if (filter.genre && game.Genre !== filter.genre) return false;
+    if (filter.rating && game.Rating.toString() !== filter.rating) return false;
+    return true;
+  });
+
+  // Render the inventory page
   return (
     <div className={styles.container}>
+      {/* Header section with title and add button */}
       <div className={styles.header}>
-        <h1>Inventory Management</h1>
+        <h1>Game Inventory</h1>
         {user && user.userType === 1 && (
           <button 
             className={styles.addButton}
@@ -209,6 +218,7 @@ export default function Inventory() {
         )}
       </div>
       
+      {/* Filter controls */}
       <div className={styles.filters}>
         <select 
           value={filter.platform}
@@ -231,29 +241,42 @@ export default function Inventory() {
         </select>
       </div>
 
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Game Name</th>
-            <th>Platform</th>
-            <th>Genre</th>
-            <th>Rating</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            {user && user.userType === 1 && <th>Actions</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {games.map((game) => (
-            <tr key={game.GameID}>
-              <td>{game.GameName}</td>
-              <td>{game.Platform}</td>
-              <td>{game.Genre}</td>
-              <td>{game.Rating}</td>
-              <td>{game.Quantity}</td>
-              <td>${typeof game.Price === 'number' ? game.Price.toFixed(2) : Number(game.Price).toFixed(2)}</td>
+      {/* Game grid display */}
+      <div className={styles.gameGrid}>
+        {filteredGames.map((game) => (
+          <div key={game.GameID} className={styles.gameCard}>
+            {/* Game image section */}
+            <div className={styles.gameImage}>
+              {game.ImageUrl ? (
+                <Image
+                  src={game.ImageUrl}
+                  alt={game.GameName}
+                  width={300}
+                  height={200}
+                  className={styles.image}
+                  priority
+                />
+              ) : (
+                <div className={styles.placeholderImage}>
+                  <span>No Image</span>
+                </div>
+              )}
+            </div>
+            {/* Game information section */}
+            <div className={styles.gameInfo}>
+              <h3>{game.GameName}</h3>
+              <div className={styles.gameDetails}>
+                <span className={styles.platform}>{game.Platform}</span>
+                <span className={styles.genre}>{game.Genre}</span>
+                <span className={styles.rating}>★ {game.Rating}</span>
+              </div>
+              <div className={styles.gamePrice}>
+                <span className={styles.price}>${typeof game.Price === 'number' ? game.Price.toFixed(2) : Number(game.Price).toFixed(2)}</span>
+                <span className={styles.quantity}>In Stock: {game.Quantity}</span>
+              </div>
+              {/* Admin actions */}
               {user && user.userType === 1 && (
-                <td>
+                <div className={styles.adminActions}>
                   <button 
                     onClick={() => startEdit(game)}
                     className={styles.editButton}
@@ -266,183 +289,43 @@ export default function Inventory() {
                   >
                     Delete
                   </button>
-                </td>
+                </div>
               )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </div>
+          </div>
+        ))}
+      </div>
 
+      {/* Add game modal */}
       {showAddForm && user && user.userType === 1 && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Add New Game</h2>
-            <form onSubmit={handleAddGame}>
-              <div className={styles.formGroup}>
-                <label>Game Name:</label>
-                <input
-                  type="text"
-                  value={newGame.GameName}
-                  onChange={(e) => setNewGame({...newGame, GameName: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Platform:</label>
-                <select
-                  value={newGame.Platform}
-                  onChange={(e) => setNewGame({...newGame, Platform: e.target.value})}
-                  required
-                >
-                  <option value="">Select Platform</option>
-                  {platforms.map((platform) => (
-                    <option key={platform} value={platform}>{platform}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Price:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={newGame.Price}
-                  onChange={(e) => setNewGame({...newGame, Price: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Rating:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={newGame.Rating}
-                  onChange={(e) => setNewGame({...newGame, Rating: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Genre:</label>
-                <select
-                  value={newGame.Genre}
-                  onChange={(e) => setNewGame({...newGame, Genre: e.target.value})}
-                  required
-                >
-                  <option value="">Select Genre</option>
-                  <option value="Adventure">Adventure</option>
-                  <option value="FPS">FPS</option>
-                  <option value="Fighting">Fighting</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Quantity:</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={newGame.Quantity}
-                  onChange={(e) => setNewGame({...newGame, Quantity: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formActions}>
-                <button type="submit">Add Game</button>
-                <button type="button" onClick={() => setShowAddForm(false)}>Cancel</button>
-              </div>
-            </form>
+            <GameForm
+              game={newGame}
+              platforms={platforms}
+              onSubmit={handleAddGame}
+              onCancel={() => setShowAddForm(false)}
+              submitLabel="Add Game"
+              onChange={handleFormChange}
+            />
           </div>
         </div>
       )}
 
+      {/* Edit game modal */}
       {showEditForm && user && user.userType === 1 && editingGame && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Edit Game</h2>
-            <form onSubmit={handleUpdateGame}>
-              <div className={styles.formGroup}>
-                <label>Game Name:</label>
-                <input
-                  type="text"
-                  value={editingGame.GameName}
-                  onChange={(e) => setEditingGame({...editingGame, GameName: e.target.value})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Platform:</label>
-                <select
-                  value={editingGame.Platform}
-                  onChange={(e) => setEditingGame({...editingGame, Platform: e.target.value})}
-                  required
-                >
-                  <option value="">Select Platform</option>
-                  {platforms.map((platform) => (
-                    <option key={platform} value={platform}>{platform}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Price:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={editingGame.Price}
-                  onChange={(e) => setEditingGame({...editingGame, Price: parseFloat(e.target.value)})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Rating:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="5"
-                  value={editingGame.Rating}
-                  onChange={(e) => setEditingGame({...editingGame, Rating: parseInt(e.target.value)})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Genre:</label>
-                <select
-                  value={editingGame.Genre}
-                  onChange={(e) => setEditingGame({...editingGame, Genre: e.target.value})}
-                  required
-                >
-                  <option value="">Select Genre</option>
-                  <option value="Adventure">Adventure</option>
-                  <option value="FPS">FPS</option>
-                  <option value="Fighting">Fighting</option>
-                </select>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Quantity:</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={editingGame.Quantity}
-                  onChange={(e) => setEditingGame({...editingGame, Quantity: parseInt(e.target.value)})}
-                  required
-                />
-              </div>
-
-              <div className={styles.formActions}>
-                <button type="submit">Update Game</button>
-                <button type="button" onClick={() => setShowEditForm(false)}>Cancel</button>
-              </div>
-            </form>
+            <GameForm
+              game={editFormData}
+              platforms={platforms}
+              onSubmit={handleUpdateGame}
+              onCancel={() => setShowEditForm(false)}
+              submitLabel="Update Game"
+              onChange={handleFormChange}
+            />
           </div>
         </div>
       )}

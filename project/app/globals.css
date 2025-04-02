@@ -1,14 +1,23 @@
+/**
+ * Global CSS Styles
+ * This file contains the base styles for the entire application.
+ * It defines the color scheme, layout defaults, and common element styles.
+ */
+
+/* Define CSS variables for consistent color usage throughout the app */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 243, 244, 246;
+  --foreground-rgb: 0, 0, 0;      /* Black text color */
+  --background-rgb: 243, 244, 246; /* Light gray background */
 }
 
+/* Reset default browser styles */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
 }
 
+/* Base HTML and body styles */
 html,
 body {
   max-width: 100vw;
@@ -17,6 +26,7 @@ body {
   color: rgb(var(--foreground-rgb));
 }
 
+/* Body layout configuration */
 body {
   min-height: 100vh;
   display: flex;
@@ -24,16 +34,19 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
+/* Main content area styling */
 main {
-  flex: 1;
-  padding-top: 1rem;
+  flex: 1;           /* Grow to fill available space */
+  padding-top: 1rem; /* Add some spacing from the top */
 }
 
+/* Link styling */
 a {
-  color: inherit;
-  text-decoration: none;
+  color: inherit;           /* Inherit text color from parent */
+  text-decoration: none;    /* Remove underline */
 }
 
+/* Button styling */
 button {
-  font-family: inherit;
+  font-family: inherit;     /* Use the same font as the rest of the app */
 } 

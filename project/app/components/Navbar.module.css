@@ -1,70 +1,87 @@
+/**
+ * Navigation Bar Styles
+ * CSS module for the navigation bar component, providing a responsive
+ * and visually appealing navigation interface with hover effects and
+ * active state indicators.
+ */
+
+/* Main navigation bar container */
 .navbar {
   background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  position: sticky;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);  /* Subtle shadow for depth */
+  position: sticky;                           /* Sticks to top on scroll */
   top: 0;
-  z-index: 1000;
+  z-index: 1000;                             /* Ensures navbar stays above other content */
 }
 
+/* Inner container for content alignment */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  height: 64px;
+  max-width: 1200px;                         /* Maximum width for larger screens */
+  margin: 0 auto;                            /* Center the container */
+  padding: 0 1rem;                           /* Horizontal padding */
+  height: 64px;                              /* Fixed height for consistency */
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  align-items: center;                       /* Vertical centering */
+  justify-content: space-between;            /* Space between logo and links */
 }
 
+/* Logo styling */
 .logo {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1e40af;
+  color: #1e40af;                           /* Deep blue color */
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.2s;                    /* Smooth color transition */
 }
 
+/* Logo hover effect */
 .logo:hover {
-  color: #2563eb;
+  color: #2563eb;                           /* Lighter blue on hover */
 }
 
+/* Navigation links container */
 .links {
   display: flex;
-  gap: 2rem;
-  align-items: center;
+  gap: 2rem;                                /* Space between links */
+  align-items: center;                       /* Vertical alignment */
 }
 
+/* Individual navigation link */
 .link {
   text-decoration: none;
-  color: #4b5563;
+  color: #4b5563;                           /* Gray text color */
   font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.2s;
+  padding: 0.5rem 1rem;                     /* Comfortable click area */
+  border-radius: 6px;                       /* Rounded corners */
+  transition: all 0.2s;                     /* Smooth transitions */
 }
 
+/* Link hover effect */
 .link:hover {
-  color: #1e40af;
-  background-color: #f3f4f6;
+  color: #1e40af;                           /* Deep blue on hover */
+  background-color: #f3f4f6;                /* Light gray background */
 }
 
+/* Active link state */
 .active {
-  color: #1e40af;
-  background-color: #eff6ff;
+  color: #1e40af;                           /* Deep blue for active state */
+  background-color: #eff6ff;                /* Light blue background */
 }
 
+/* Logout button styling */
 .logoutButton {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: #fee2e2;                /* Light red background */
+  color: #dc2626;                           /* Red text */
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s;                     /* Smooth transitions */
 }
 
+/* Logout button hover effect */
 .logoutButton:hover {
-  background-color: #fecaca;
-  color: #b91c1c;
+  background-color: #fecaca;                /* Slightly darker red background */
+  color: #b91c1c;                           /* Darker red text */
 } 

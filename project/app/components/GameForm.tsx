@@ -1,18 +1,42 @@
-import { GameFormData } from '../types';
+/**
+ * Game Form Component
+ * A comprehensive form for adding and editing video game entries.
+ * Includes fields for game details and image upload functionality.
+ */
+
+import { GameFormData } from '../types/types';
 import styles from './GameForm.module.css';
 import Image from 'next/image';
 import { useState } from 'react';
 import { api } from '../services/api';
 
+/**
+ * Props interface for the GameForm component
+ */
 interface GameFormProps {
-  game: GameFormData;
-  platforms: string[];
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-  submitLabel: string;
-  onChange: (field: keyof GameFormData, value: string) => void;
+  game: GameFormData;              // Current game data
+  platforms: string[];            // Available gaming platforms
+  onSubmit: (e: React.FormEvent) => void;  // Form submission handler
+  onCancel: () => void;          // Cancel operation handler
+  submitLabel: string;           // Text for the submit button
+  onChange: (field: keyof GameFormData, value: string) => void;  // Field change handler
 }
 
+/**
+ * GameForm Component
+ * A form component for managing video game entries with image upload support.
+ * 
+ * Features:
+ * - Input validation
+ * - Image upload with preview
+ * - Platform selection
+ * - Genre selection
+ * - Price and rating inputs
+ * - Quantity management
+ * 
+ * @param {GameFormProps} props - Component props
+ * @returns {JSX.Element} The game form component
+ */
 export default function GameForm({
   game,
   platforms,
@@ -21,9 +45,14 @@ export default function GameForm({
   submitLabel,
   onChange
 }: GameFormProps) {
+  // State for image preview and upload status
   const [previewUrl, setPreviewUrl] = useState<string | null>(game.ImageUrl || null);
   const [isUploading, setIsUploading] = useState(false);
 
+  /**
+   * Handles image file selection and upload
+   * @param {React.ChangeEvent<HTMLInputElement>} e - File input change event
+   */
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -36,18 +65,18 @@ export default function GameForm({
       setIsUploading(true);
       console.log('Starting image upload for file:', file.name);
       
-      // Show preview immediately
+      // Show preview immediately using FileReader
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Upload the image
+      // Upload the image to the server
       const imageUrl = await api.uploadImage(file);
       console.log('Image uploaded successfully, URL:', imageUrl);
       
-      // Update the form data with the new image URL
+      // Update form data with the new image URL
       onChange('ImageUrl', imageUrl);
     } catch (error) {
       console.error('Failed to upload image:', error);
@@ -58,6 +87,9 @@ export default function GameForm({
     }
   };
 
+  /**
+   * Removes the selected image and clears the preview
+   */
   const handleRemoveImage = () => {
     setPreviewUrl(null);
     onChange('ImageUrl', '');
@@ -65,6 +97,7 @@ export default function GameForm({
 
   return (
     <form onSubmit={onSubmit}>
+      {/* Game Name Input */}
       <div className={styles.formGroup}>
         <label>Game Name:</label>
         <input
@@ -75,6 +108,7 @@ export default function GameForm({
         />
       </div>
 
+      {/* Platform Selection */}
       <div className={styles.formGroup}>
         <label>Platform:</label>
         <select
@@ -89,6 +123,7 @@ export default function GameForm({
         </select>
       </div>
 
+      {/* Price Input */}
       <div className={styles.formGroup}>
         <label>Price:</label>
         <input
@@ -101,6 +136,7 @@ export default function GameForm({
         />
       </div>
 
+      {/* Rating Input */}
       <div className={styles.formGroup}>
         <label>Rating:</label>
         <input
@@ -113,6 +149,7 @@ export default function GameForm({
         />
       </div>
 
+      {/* Genre Selection */}
       <div className={styles.formGroup}>
         <label>Genre:</label>
         <select
@@ -127,6 +164,7 @@ export default function GameForm({
         </select>
       </div>
 
+      {/* Quantity Input */}
       <div className={styles.formGroup}>
         <label>Quantity:</label>
         <input
@@ -138,6 +176,7 @@ export default function GameForm({
         />
       </div>
 
+      {/* Image Upload Section */}
       <div className={styles.formGroup}>
         <label>Game Image (Optional):</label>
         <div className={styles.imageUpload}>
@@ -170,6 +209,7 @@ export default function GameForm({
         </div>
       </div>
 
+      {/* Form Action Buttons */}
       <div className={styles.formActions}>
         <button type="submit">{submitLabel}</button>
         <button type="button" onClick={onCancel}>Cancel</button>

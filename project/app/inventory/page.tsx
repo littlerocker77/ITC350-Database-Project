@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import styles from './inventory.module.css';
 import GameForm from '../components/GameForm';
 import { api } from '../services/api';
-import { VideoGame, User, GameFormData, FilterState } from '../types';
+import { VideoGame, User, GameFormData, FilterState } from '../types/types';
 import Image from 'next/image';
 
 export default function Inventory() {
@@ -98,7 +98,7 @@ export default function Inventory() {
    */
   const handleAddGame = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || user.userType !== 1) {
+    if (!user || user.UserType !== 1) {
       setError('Unauthorized: Only administrators can add games');
       return;
     }
@@ -130,7 +130,7 @@ export default function Inventory() {
    */
   const handleUpdateGame = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || user.userType !== 1 || !editingGame) return;
+    if (!user || user.UserType !== 1 || !editingGame) return;
 
     try {
       await api.updateGame(editingGame.GameID, editFormData);
@@ -147,7 +147,7 @@ export default function Inventory() {
    * Includes confirmation dialog and admin validation
    */
   const handleDeleteGame = async (gameId: number) => {
-    if (!user || user.userType !== 1) return;
+    if (!user || user.UserType !== 1) return;
 
     if (!confirm('Are you sure you want to delete this game?')) {
       return;
@@ -208,7 +208,7 @@ export default function Inventory() {
       {/* Header section with title and add button */}
       <div className={styles.header}>
         <h1>Game Inventory</h1>
-        {user && user.userType === 1 && (
+        {user && user.UserType === 1 && (
           <button 
             className={styles.addButton}
             onClick={() => setShowAddForm(true)}
@@ -275,7 +275,7 @@ export default function Inventory() {
                 <span className={styles.quantity}>In Stock: {game.Quantity}</span>
               </div>
               {/* Admin actions */}
-              {user && user.userType === 1 && (
+              {user && user.UserType === 1 && (
                 <div className={styles.adminActions}>
                   <button 
                     onClick={() => startEdit(game)}
@@ -297,7 +297,7 @@ export default function Inventory() {
       </div>
 
       {/* Add game modal */}
-      {showAddForm && user && user.userType === 1 && (
+      {showAddForm && user && user.UserType === 1 && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Add New Game</h2>
@@ -314,7 +314,7 @@ export default function Inventory() {
       )}
 
       {/* Edit game modal */}
-      {showEditForm && user && user.userType === 1 && editingGame && (
+      {showEditForm && user && user.UserType === 1 && editingGame && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>Edit Game</h2>

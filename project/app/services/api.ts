@@ -4,7 +4,7 @@
  * It handles data transformation, error handling, and authentication for all API requests.
  */
 
-import { VideoGame, GameFormData } from '../types';
+import { VideoGame, GameFormData } from '../types/types';
 
 // Base URL for all API endpoints
 const API_BASE = '/api';
